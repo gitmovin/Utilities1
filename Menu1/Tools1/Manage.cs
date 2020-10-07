@@ -23,10 +23,14 @@ namespace Utilities
 		public int totalIterations = 1000000;
 		public bool printDetailAccepted = false;
 		public bool printDetailRejected = false;
+		public bool printDetailMoved = true;
 
 		public string fullyQualifiedfileName;
 		public string fileName;
 		public string fullPathName;
+		public string pathNamePart1;
+		public string pathAndFileNamePart2;
+		public string movedPathName;
 		public string[] filePathParts;
 		public int currentFileIteration = 0;
 		public int currentPathIteration = 0;
@@ -95,6 +99,24 @@ namespace Utilities
 					Console.Write("A");
 				}
 				totalAccepted++;
+				if (moveFile())
+				{
+
+					if (printDetailMoved)
+					{
+						Console.WriteLine("");
+						Console.WriteLine("MOVEDFRM: " + fileName + " ");
+						Console.WriteLine("MOVED TO: " + movedPathName + " ");
+						Console.WriteLine("");
+					}
+					else
+					{
+						Console.Write("M");
+					}
+
+				}
+
+
 			}
 			Console.WriteLine("");
 			Console.WriteLine("Total Accepted: " + totalAccepted);
@@ -174,10 +196,41 @@ namespace Utilities
 			if (fullPathName.Contains(@"\z_Archive")) return false;
 			if (fullPathName.Contains(@"trash")) return false;
 			if (fullPathName.Contains(@"MasterFileUpdates")) return false;
+			if (fullPathName.Contains(@"\Metadata\")) return false;
 			if (fileName.Contains(@".DS_Store")) return false;
 			if (fileName[0] == '.') return false;
 			return true;
 		}
+		private bool moveFile()
+        {
+			// Check the patterns against full path & file names, 
+			// generate destination path & file name.
+			if (buildMovePath(@"\_emergency"))	return true;
+			if (buildMovePath(@"\music\"))		return true;
+			if (buildMovePath(@"things\"))	return true;
+//			if (buildMovePath(@"zz")) return true;
+			return false;
+		}
+        private bool buildMovePath(string pattern)
+        {
+            if (!fullPathName.Contains(pattern))
+            {
+				// The fully qualified path and file name do not contain the pattern.
+				return false;
+            }
+			// The path and file name do contain the pattern.
+			// Build to new path and file name after calculating the
+			// characters to chop out of the middle of the original path name
+			string tempString = startingDestinationFolder + fullPathName;
+			int cutStart = startingDestinationFolder.Length;
+			int cutEnd = tempString.IndexOf(pattern);
+
+			// cut out the old portion of the path that will not be used after the move
+			movedPathName = tempString.Remove(cutStart, cutEnd - cutStart - 1);
+
+			// What's left is the new path name to which the file will be moved
+			return true;
+       }
 	}
 }
 
