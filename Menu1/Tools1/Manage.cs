@@ -14,28 +14,31 @@ namespace Utilities
 
 	public class ManageArchiveClass
 	{
-//		public string startingSourceFolder = @"D:\";
-//		public string startingSourceFolder = @"D:\SP_JD";
+		//		public string startingSourceFolder = @"D:\";
+		//		public string startingSourceFolder = @"D:\SP_JD";
 		public string startingSourceFolder = @"C:\zz_TEMP_IN";
 		public string startingDestinationFolder = @"C:\zzz_TST\DEST\";
 		public int MaxFileIterations = 500000;
 		public int MaxPathIterations = 500000;
 		public int totalIterations = 1000000;
-		public bool printDetailAccepted = false;
+		public bool printDetailAccepted = true;
 		public bool printDetailRejected = false;
 		public bool printDetailMoved = true;
-
+		public string logFileName_Accepted = @"C:\zzz_TST\LOG\logFile_Accepted.txt";
+		public string logFileName_Rejected = @"C:\zzz_TST\LOG\logFile_Rejected.txt";
+		public string logFileName_Moved = @"C:\zzz_TST\LOG\logFile_Moved.txt";
 		public string fullyQualifiedfileName;
 		public string fileName;
 		public string fullPathName;
 		public string pathNamePart1;
 		public string pathAndFileNamePart2;
 		public string movedPathName;
-		public string[] filePathParts;
+//		public string[] filePathParts;
 		public int currentFileIteration = 0;
 		public int currentPathIteration = 0;
 		public int totalAccepted = 0;
 		public int totalRejected = 0;
+		public int totalMoved = 0;
 
 		// Folder parameters
 		Stack<string> sourceFolderNameStack = new Stack<string>();
@@ -64,6 +67,14 @@ namespace Utilities
 		public void ExecuteProcess()
 		{
 			Console.WriteLine("Executing Process");
+			// set up output text files to contain the results of this process
+
+
+			// Create log files.
+			File.WriteAllText(logFileName_Accepted, "Log for Accepted files" + Environment.NewLine);
+			File.WriteAllText(logFileName_Rejected, "Log for Rejected files" + Environment.NewLine);
+			File.WriteAllText(logFileName_Moved, "Log for Moved files" + Environment.NewLine);
+
 
 			// Loop until we run out of iterations
 			while (totalIterations-- > 0)
@@ -81,26 +92,19 @@ namespace Utilities
 					if (printDetailRejected)
 					{
 						Console.WriteLine("REJECTED: " + fileName + " ");
+
 					}
 					else
 					{
 						Console.Write("R");
 					}
+					File.AppendAllText(logFileName_Rejected, "REJECTED: " + fileName + " " + Environment.NewLine);
 					totalRejected++;
 					continue;
 				}
-				// file accepted. SAVE IT somewhere.
-				if (printDetailAccepted)
-				{
-					Console.WriteLine("ACCEPTED: " + fileName + " ");
-				}
-				else
-				{
-					Console.Write("A");
-				}
-				totalAccepted++;
 				if (moveFile())
 				{
+					totalMoved++;
 
 					if (printDetailMoved)
 					{
@@ -114,6 +118,23 @@ namespace Utilities
 						Console.Write("M");
 					}
 
+					File.AppendAllText(logFileName_Moved, "MOVEDFROM: " + fileName + " " + Environment.NewLine);
+					File.AppendAllText(logFileName_Moved, "  MOVEDTO: " + movedPathName + " " + Environment.NewLine + Environment.NewLine);
+				}
+                else
+                {
+					// File was accepted but not moved
+					totalAccepted++;
+					if (printDetailAccepted)
+                    {
+
+						Console.WriteLine("ACCEPTED: " + fileName + " ");
+					}
+					else
+					{
+						Console.Write("A");
+					}
+					File.AppendAllText(logFileName_Accepted, "ACCEPTED: " + fileName + " " + Environment.NewLine);
 				}
 
 
@@ -180,8 +201,8 @@ namespace Utilities
 			if (currentPathIteration >= MaxPathIterations) return false;
 
 			if (fullPathName.Contains("RECYCLE.BIN")) return false;
-			//		if (fullPathName.Contains(@"\Desktop")) return false;
 			if (fullPathName.Contains(@"\from 1MM\Users\margaret\Documents\_R")) return false;
+			if (fullPathName.Contains(@"\from 1MM\Users\margaret\Documents\_M\people\RGP")) return false;
 			if (fullPathName.Contains(@"\from 3MBPro\Users\ronpearl\_M")) return false;
 			if (fullPathName.Contains(@"untitled folder")) return false;
 			if (fullPathName.Contains(@"New folder")) return false;
@@ -197,6 +218,10 @@ namespace Utilities
 			if (fullPathName.Contains(@"trash")) return false;
 			if (fullPathName.Contains(@"MasterFileUpdates")) return false;
 			if (fullPathName.Contains(@"\Metadata\")) return false;
+			if (fullPathName.Contains(@"1Password")) return false;
+			if (fullPathName.Contains(@"- DELETE -")) return false;
+			if (fullPathName.Contains(@"Django")) return false;
+			if (fullPathName.Contains(@"\temp\")) return false;
 			if (fileName.Contains(@".DS_Store")) return false;
 			if (fileName[0] == '.') return false;
 			return true;
@@ -205,10 +230,29 @@ namespace Utilities
         {
 			// Check the patterns against full path & file names, 
 			// generate destination path & file name.
-			if (buildMovePath(@"\_emergency"))	return true;
-			if (buildMovePath(@"\music\"))		return true;
-			if (buildMovePath(@"things\"))	return true;
-//			if (buildMovePath(@"zz")) return true;
+			if (buildMovePath(@"\_emergency\"))	return true;
+			if (buildMovePath(@"\music\")) return true;
+			if (buildMovePath(@"\Music\")) return true;
+			if (buildMovePath(@"\things\")) return true;
+			if (buildMovePath(@"\Things\")) return true;
+			if (buildMovePath(@"\people\")) return true;
+			if (buildMovePath(@"\People\")) return true;
+			if (buildMovePath(@"\places\")) return true;
+			if (buildMovePath(@"\events\")) return true;
+			if (buildMovePath(@"\Pictures\")) return true;
+			if (buildMovePath(@"\photos\")) return true;
+			if (buildMovePath(@"\Photos\")) return true;
+			if (buildMovePath(@"\orgs\")) return true;
+			if (buildMovePath(@"\Organizations\")) return true;
+			if (buildMovePath(@"\_PEARL\")) return true;
+			if (buildMovePath(@"\Seabolt\")) return true;
+			if (buildMovePath(@"\neighborhoods\")) return true;
+			if (buildMovePath(@"\cdsir\")) return true;
+			if (buildMovePath(@"\Desktop\")) return true;
+			if (buildMovePath(@"\zip\")) return true;
+			if (buildMovePath(@"\src\")) return true;
+			if (buildMovePath(@"\Src\")) return true;
+			///			if (buildMovePath(@"zz")) return true;
 			return false;
 		}
         private bool buildMovePath(string pattern)
@@ -226,11 +270,53 @@ namespace Utilities
 			int cutEnd = tempString.IndexOf(pattern);
 
 			// cut out the old portion of the path that will not be used after the move
-			movedPathName = tempString.Remove(cutStart, cutEnd - cutStart - 1);
+			string tempString2 = tempString.Remove(cutStart, cutEnd - cutStart - 1);
+
+			// EXPERIMENTAL CODE
+			// Add a code representing the source of the data right after the pattern folder
+
+			if (fullPathName.Contains("3MBPro"))
+			{
+				movedPathName = tempString2.Insert(cutStart + pattern.Length + 1, @"3MBPro\");
+			} else
+			if (fullPathName.Contains("2MBook"))
+			{
+				movedPathName = tempString2.Insert(cutStart + pattern.Length + 1, @"2MBook\");
+			} else
+
+			if (fullPathName.Contains("1MM"))
+			{
+				movedPathName = tempString2.Insert(cutStart + pattern.Length + 1, @"1MM\");
+			}
+
+
+
+
+			/*
+			 * if (insertDataSource("3MBPro")) return;
+						if (insertDataSource("2MBook")) return;
+						if (insertDataSource("1MM")) return;
+						if (insertDataSource("0")) return;
+			*/
+			//			if (fullPathName.Contains("3MBPro")) { movedPathName = tempString2.Insert(cutStart + pattern.Length + 1, "3MBPro"); return;
+			//			if (fullPathName.Contains("3MBPro")) { movedPathName = tempString2.Insert(cutStart + pattern.Length + 1, "3MBPro"); return;
+
+
+
+
+
 
 			// What's left is the new path name to which the file will be moved
 			return true;
        }
+/*		private bool insertDataSource(int atLocation, string dataSource)
+        {
+			if (fullPathName.Contains(dataSource))
+            {
+				
+            }
+        }
+*/
 	}
 }
 
