@@ -21,15 +21,15 @@ namespace Utilities
 
 		///////////////////////////////		public string finalFileLocation
 
+		public int MaxFileIterations = 500000;
+		public int MaxPathIterations = 500000;
+		public int totalIterations = 1000000;
 
 		/*
-				 public int MaxFileIterations = 500000;
-				public int MaxPathIterations = 500000;
-				public int totalIterations = 1000000;
-		*/
-		public int MaxFileIterations = 500;
-		public int MaxPathIterations = 500;
+		public int MaxFileIterations = 100;
+		public int MaxPathIterations = 100;
 		public int totalIterations = 1000;
+	*/
 
 		public bool printDetailAccepted = true;
 		public bool printDetailRejected = false;
@@ -129,39 +129,40 @@ namespace Utilities
 					File.AppendAllText(logFileName_Moved, "MOVEDFROM: " + sourceFileName + " " + Environment.NewLine);
 					File.AppendAllText(logFileName_Moved, "  MOVEDTO: " + movedFileName + " " + Environment.NewLine + Environment.NewLine);
 
-                    //
-                    // Start of section that copies files to diskd
-                    //
-/*
-                    if (writeFilesToDisk)
-                    {
-						// 
-						System.IO.Directory.CreateDirectory(movedFileName);
-					}
-
 					//
-					// End of section that copies files to disk
+					// Start of section that copies files to diskd
 					//
+					/*
+										if (writeFilesToDisk)
+										{
+											// 
+											System.IO.Directory.CreateDirectory(movedFileName);
+										}
 
-					string dosCommand = "\"" + sourceFolderName + "\"";
+										//
+										// End of section that copies files to disk
+										//
 
-					
-					FileInfo fInfo = new FileInfo(dosCommand);
-					if (fInfo.Exists)
-					{
-						Console.WriteLine("File exits");
-					}
-                    else
-                    {
-						Console.WriteLine("File does not exist");
-                    }
-*/				}
-                else
-                {
+										string dosCommand = "\"" + sourceFolderName + "\"";
+
+
+										FileInfo fInfo = new FileInfo(dosCommand);
+										if (fInfo.Exists)
+										{
+											Console.WriteLine("File exits");
+										}
+										else
+										{
+											Console.WriteLine("File does not exist");
+										}
+					*/
+				}
+				else
+				{
 					// File was accepted but not moved
 					totalAccepted++;
 					if (printDetailAccepted)
-                    {
+					{
 
 						Console.WriteLine("ACCEPTED: " + sourceFileName + " ");
 					}
@@ -262,14 +263,15 @@ namespace Utilities
 			return true;
 		}
 		private bool moveFile()
-        {
+		{
 			// Check the patterns against full path & file names, 
 			// generate destination path & file name.
-			if (buildMovePath(@"_emergency\"))	return true;
+			if (buildMovePath(@"_emergency\")) return true;
 			if (buildMovePath(@"music\")) return true;
 			if (buildMovePath(@"Music\")) return true;
+			if (buildMovePath(@"hings\")) return true;
 			if (buildMovePath(@"things\")) return true;
-			if (buildMovePath(@"Things\")) return true;
+			if (buildMovePath("Things\\")) return true;
 			if (buildMovePath(@"people\")) return true;
 			if (buildMovePath(@"People\")) return true;
 			if (buildMovePath(@"places\")) return true;
@@ -289,17 +291,102 @@ namespace Utilities
 			if (buildMovePath(@"Src\")) return true;
 			return false;
 		}
-        private bool buildMovePath(string pattern)
-        {
-            if (!sourceFileName.Contains(pattern))
-            {
+
+		/*********************************************************************************************
+		  The buildMovePath method builds a destination string with the following components:
+			Part_1. Destination folder piece  - the beginning portion of where the file will be copied to
+			Part_2. Keyword piece - the identified of the type of data being stored
+			Part_3. Data Source piece - the origin computer from which the data was extracted
+			Part_4. Remaining path - the rest of the path
+			Part_5. File name - the name of the file
+		*********************************************************************************************/
+
+
+		private bool buildMovePath(string pattern)
+		{
+			if (!sourceFileName.Contains(pattern))
+			{
 				// The fully qualified path and file name do not contain the pattern.
 				return false;
-            }
-			// The path and file name do contain the pattern.
-			// Build to new path and file name after calculating the
-			// characters to chop out of the middle of the original path name
-			string tempString = startingDestinationFolder + sourceFileName;
+			}
+
+			// PART 1: now build the new path starting with part 1
+			string destPathPart_1 = startingDestinationFolder;
+
+
+			// PART 2: Get the starting and ending locations of the folder that contains the pattern
+			int part2Start = sourceFileName.IndexOf(pattern);
+			int part2End = part2Start;
+			// fan out to find beginning and end of this part of the path
+			while (sourceFileName[part2Start] != '\\')
+			{
+				part2Start--;
+			}
+			while (sourceFileName[part2End] != '\\')
+			{
+				part2End++;
+			}
+			string destPathPart_2 = sourceFileName.Substring(part2Start + 1, part2End - part2Start);
+
+
+			// PART 3: 
+			int part3Start = part2End + 1;
+
+			string destPathPart_3;
+			if (sourceFileName.Contains("3MBPro"))
+			{
+				destPathPart_3 = "3MBPro\\";
+
+			}
+			else
+			if (sourceFileName.Contains("2MBook"))
+			{
+				destPathPart_3 = "2MBook\\";
+			}
+			else
+			if (sourceFileName.Contains("1MM"))
+			{
+				destPathPart_3 = "1MM";
+			}
+			else
+			{
+				destPathPart_3 = "pOther\\";
+			}
+			int part3End = part3Start + destPathPart_3.Length;
+
+			// PART 5: (PART4 is last
+			int part5End = sourceFileName.Length -1;
+			int part5Start = part5End;
+			while(sourceFileName[part5Start] != '\\')
+			{
+				part5Start--;
+			}
+			string destPathPart_5 = sourceFileName.Substring(part5Start + 1, part5End - part5Start);
+
+
+
+			// PART 4: 
+			int part4End = part5Start + 1;
+//			int part4Start = part2End - destPathPart_3.Length;
+			int part4Start = part2End + 1;
+
+			string destPathPart_4 = sourceFileName.Substring(part4Start, part4End - part4Start);
+
+			 movedFileName = destPathPart_1 + destPathPart_2 + destPathPart_3 + destPathPart_4 + destPathPart_5;
+
+			return true;
+		}
+	}
+
+
+
+/*
+
+
+		// The path and file name do contain the pattern.
+		// Build to new path and file name after calculating the
+		// characters to chop out of the middle of the original path name
+		string tempString = startingDestinationFolder + sourceFileName;
 			int cutStart = startingDestinationFolder.Length;
 			int cutEnd = tempString.IndexOf(pattern);
 
@@ -309,7 +396,7 @@ namespace Utilities
 
 			// loop backwards through temporary string until "\" is found.
 			// This allows patterns to not start with "\".
-			while (cutEnd > 0)
+			    while (cutEnd > 0)
             {
 				if (tempString[cutEnd] == '\\')
 				{
@@ -321,46 +408,60 @@ namespace Utilities
 
 
 
+
+
+// =============== test CODE ====================
+			// Now loop forwards through temporary string until "\" is found.
+			// This allows patterns to not start with "\".
+			var patternLength = pattern.Length;
+			var extraPartOfPattern = 0;
+			while (patternLength > 0)
+			{
+				if (tempString[cutEnd - extraPartOfPattern] == '\\')
+				{
+					break;
+				}
+				extraPartOfPattern++;
+				// =============== test CODE ====================
+
+
+
+
+
+			}
+
+
+
 			// cut out the old portion of the path that will not be used after the move
 			string tempString2 = tempString.Remove(cutStart, cutEnd - cutStart + 1);
 
 			if (sourceFileName.Contains("3MBPro"))
 			{
-				movedFileName = tempString2.Insert(cutStart + pattern.Length + 1, @"3MBPro\");
+				movedFileName = tempString2.Insert(cutStart + patternLength + 0, "3MBPro\\");
 			}
 			else
 			if (sourceFileName.Contains("2MBook"))
 			{
-				movedFileName = tempString2.Insert(cutStart + pattern.Length + 1, @"2MBook\");
+				movedFileName = tempString2.Insert(cutStart + patternLength + 0, "2MBook\\");
 			}
 			else
 
 			if (sourceFileName.Contains("1MM"))
 			{
-				movedFileName = tempString2.Insert(cutStart + pattern.Length + 1, @"1MM\");
+				movedFileName = tempString2.Insert(cutStart + patternLength + 0, "1MM\\");
 			}
 			else
 			{
-				movedFileName = tempString2.Insert(cutStart + pattern.Length + 1, @"0_other\");
+				movedFileName = tempString2.Insert(cutStart + patternLength + 0, "0_other\\");
 			}
-			return true;
-        }
-/*
-		private bool copyFile()
-        {
-			// copies file from "sourceFileName" to "movedFileName"
 
-			// See whether source file still exists
+			// DEBUGGING CODE - REMOTE
+			Console.WriteLine("");
+			Console.WriteLine(pattern + pattern.Length.ToString());
+			// DEBUGGING CODE - REMOTE
 
-
-			// See whether movedFileName (destination) file exists
-
-
-			// execute the windows copy command (AFTER DEALING WITH THE CREATION OF THE FOLDER WITHIN WHICH THE FILE IS TO BE COPIED)
-			return true;
-		}
 */
-	}
 }
+
 
 
