@@ -1,5 +1,4 @@
-﻿// using Microsoft.VisualBasic;
-using System;
+﻿using System;
 using System.Runtime.CompilerServices;
 using System.Collections;
 using System.Collections.Generic;
@@ -14,18 +13,14 @@ namespace Utilities
 
 	public class ManageArchiveClass
 	{
-		//		public string startingSourceFolder = @"D:\";
-		//		public string startingSourceFolder = @"D:\SP_JD";
 		public string startingSourceFolder = @"C:\zz_TEMP_IN";
 		public string startingDestinationFolder = @"C:\zz_TEMP_OUT\";
-
-		///////////////////////////////		public string finalFileLocation
 
 		public int MaxFileIterations = 500000;
 		public int MaxPathIterations = 500000;
 		public int totalIterations = 1000000;
 
-		/*
+		/* - FOR TESTING - KEEP for NOW
 		public int MaxFileIterations = 100;
 		public int MaxPathIterations = 100;
 		public int totalIterations = 1000;
@@ -77,7 +72,6 @@ namespace Utilities
 			Console.WriteLine("Executing Process");
 			// set up output text files to contain the results of this process
 
-
 			// Create log files.
 			File.WriteAllText(logFileName_Accepted, "Log for Accepted files" + Environment.NewLine);
 			File.WriteAllText(logFileName_Rejected, "Log for Rejected files" + Environment.NewLine);
@@ -128,34 +122,6 @@ namespace Utilities
 
 					File.AppendAllText(logFileName_Moved, "MOVEDFROM: " + sourceFileName + " " + Environment.NewLine);
 					File.AppendAllText(logFileName_Moved, "  MOVEDTO: " + movedFileName + " " + Environment.NewLine + Environment.NewLine);
-
-					//
-					// Start of section that copies files to diskd
-					//
-					/*
-										if (writeFilesToDisk)
-										{
-											// 
-											System.IO.Directory.CreateDirectory(movedFileName);
-										}
-
-										//
-										// End of section that copies files to disk
-										//
-
-										string dosCommand = "\"" + sourceFolderName + "\"";
-
-
-										FileInfo fInfo = new FileInfo(dosCommand);
-										if (fInfo.Exists)
-										{
-											Console.WriteLine("File exits");
-										}
-										else
-										{
-											Console.WriteLine("File does not exist");
-										}
-					*/
 				}
 				else
 				{
@@ -217,8 +183,6 @@ namespace Utilities
 				}
 				// 3.create arry of file names in the currentFolder
 
-
-
 				// Get list of file names in source folder
 				sourceFileNameList = Directory.GetFiles(sourceFolderName);
 
@@ -269,9 +233,9 @@ namespace Utilities
 			if (buildMovePath(@"_emergency\")) return true;
 			if (buildMovePath(@"music\")) return true;
 			if (buildMovePath(@"Music\")) return true;
-			if (buildMovePath(@"hings\")) return true;
+			if (buildMovePath(@"Things\")) return true;
 			if (buildMovePath(@"things\")) return true;
-			if (buildMovePath("Things\\")) return true;
+			if (buildMovePath(@"Things\")) return true;
 			if (buildMovePath(@"people\")) return true;
 			if (buildMovePath(@"People\")) return true;
 			if (buildMovePath(@"places\")) return true;
@@ -346,15 +310,16 @@ namespace Utilities
 			else
 			if (sourceFileName.Contains("1MM"))
 			{
-				destPathPart_3 = "1MM";
+				destPathPart_3 = "1MM\\";
 			}
 			else
 			{
-				destPathPart_3 = "pOther\\";
+				destPathPart_3 = "9Other\\";
 			}
 			int part3End = part3Start + destPathPart_3.Length;
 
-			// PART 5: (PART4 is last
+
+			// PART 5: (PART4 needs to be last)
 			int part5End = sourceFileName.Length -1;
 			int part5Start = part5End;
 			while(sourceFileName[part5Start] != '\\')
@@ -367,7 +332,6 @@ namespace Utilities
 
 			// PART 4: 
 			int part4End = part5Start + 1;
-//			int part4Start = part2End - destPathPart_3.Length;
 			int part4Start = part2End + 1;
 
 			string destPathPart_4 = sourceFileName.Substring(part4Start, part4End - part4Start);
@@ -377,90 +341,6 @@ namespace Utilities
 			return true;
 		}
 	}
-
-
-
-/*
-
-
-		// The path and file name do contain the pattern.
-		// Build to new path and file name after calculating the
-		// characters to chop out of the middle of the original path name
-		string tempString = startingDestinationFolder + sourceFileName;
-			int cutStart = startingDestinationFolder.Length;
-			int cutEnd = tempString.IndexOf(pattern);
-
-
-
-
-
-			// loop backwards through temporary string until "\" is found.
-			// This allows patterns to not start with "\".
-			    while (cutEnd > 0)
-            {
-				if (tempString[cutEnd] == '\\')
-				{
-					break;
-				}
-				cutEnd--;
-            }
-
-
-
-
-
-
-// =============== test CODE ====================
-			// Now loop forwards through temporary string until "\" is found.
-			// This allows patterns to not start with "\".
-			var patternLength = pattern.Length;
-			var extraPartOfPattern = 0;
-			while (patternLength > 0)
-			{
-				if (tempString[cutEnd - extraPartOfPattern] == '\\')
-				{
-					break;
-				}
-				extraPartOfPattern++;
-				// =============== test CODE ====================
-
-
-
-
-
-			}
-
-
-
-			// cut out the old portion of the path that will not be used after the move
-			string tempString2 = tempString.Remove(cutStart, cutEnd - cutStart + 1);
-
-			if (sourceFileName.Contains("3MBPro"))
-			{
-				movedFileName = tempString2.Insert(cutStart + patternLength + 0, "3MBPro\\");
-			}
-			else
-			if (sourceFileName.Contains("2MBook"))
-			{
-				movedFileName = tempString2.Insert(cutStart + patternLength + 0, "2MBook\\");
-			}
-			else
-
-			if (sourceFileName.Contains("1MM"))
-			{
-				movedFileName = tempString2.Insert(cutStart + patternLength + 0, "1MM\\");
-			}
-			else
-			{
-				movedFileName = tempString2.Insert(cutStart + patternLength + 0, "0_other\\");
-			}
-
-			// DEBUGGING CODE - REMOTE
-			Console.WriteLine("");
-			Console.WriteLine(pattern + pattern.Length.ToString());
-			// DEBUGGING CODE - REMOTE
-
-*/
 }
 
 
